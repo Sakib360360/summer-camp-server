@@ -1,13 +1,31 @@
 const express = require('express')
 const port = process.env.PORT || 5000
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const cors = require('cors')
 const app = express()
-
+const jwt = require('jsonwebtoken');
 // middleware
 app.use(cors())
 app.use(express.json())
+
+
+// jwt varification
+const varifyJWT = (req, res, next) => {
+    const authorization = req.headers.authorization;
+    if (!authorization) {
+        return res.status(401).send({ error: true, message: 'You are not authorized' })
+    }
+    const token = authorization.split(' ')[1]
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ error: true, message: 'You are not authorized' })
+        }
+        req.decoded = decoded;
+        next()
+    })
+}
 
 
 
@@ -33,6 +51,37 @@ async function run() {
     await client.connect();
     const classCollection = client.db('language-camp').collection('classes')
     const instructorCollection = client.db('language-camp').collection('instructors')
+    const selectedClasses = client.db('language-camp').collection('selected-classes')
+
+
+    // jwt
+    app.post('/jwt', (req, res) => {
+        const user = req.body;
+        const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1hr' })
+        res.send({ token })
+    })
+
+
+    // post selected class
+    app.post('/selectedClasses', varifyJWT,async(req,res)=>{
+        const newClass = req.body;
+        const result = await selectedClasses.insertOne(newClass)
+        res.send(result)
+    })
+
+    // get selected classes
+    app.get('/selectedClasses',varifyJWT,async(req,res)=>{
+        const result = await selectedClasses.find().toArray();
+        res.send(result)
+    })
+
+    // delete selected classes
+    app.delete('/selectedClasses/:id', varifyJWT,async(req,res)=>{
+        const id = req.params.id;
+        const query = {_id:new ObjectId(id)}
+        const result  = await selectedClasses.deleteOne(query)
+        res.send(result)
+    })
 
 
     // get all classes
