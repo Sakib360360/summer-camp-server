@@ -145,8 +145,8 @@ async function run() {
         })
         // get all classes for admin management
         app.get('/allClasses',varifyJWT,async(req,res)=>{
-            const query = {status:'pending'}
-            const result = await classCollection.find(query).toArray()
+            // const query = {status:'pending'}
+            const result = await classCollection.find().toArray()
             res.send(result)
         })
         // update status
@@ -159,7 +159,21 @@ async function run() {
             }
             const result = await classCollection.updateOne(filter,updateDoc)
             res.send(result)
-            console.log(status,id)
+
+        })
+
+        // send feedback
+
+        app.put('/sendFeedback/:id',async(req,res)=>{
+            const id = req.params.id;
+            const feedback = req.body.feedback;
+            const filter = {_id:new ObjectId(id)}
+            const updateDoc ={
+                $set:{feedback:feedback}
+            }
+            const result = await classCollection.updateOne(filter,updateDoc)
+            console.log(result)
+            res.send(result)
         })
         // get classes by instructor
         app.get('/myClasses/:email',varifyJWT,async(req,res)=>{
