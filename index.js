@@ -90,6 +90,19 @@ async function run() {
             }
 
         })
+        // instructor dashboard
+
+        app.get('/users/instructor/:email',varifyJWT,async(req,res)=>{
+            const email = req.params.email;
+            if(req.decoded.email !== email){
+                return res.send({instructor:false})
+            }
+            const query = {email:email}
+            const user = await userCollection.findOne(query)
+            const result = {instructor:user?.role === 'instructor'}
+            res.send(result)
+        })
+
 
         // delete selected classes
         app.delete('/selectedClasses/:id', varifyJWT, async (req, res) => {
@@ -102,8 +115,8 @@ async function run() {
         /*/ -----------------users management------------------/*/
 
         app.post('/users', async (req, res) => {
-            const users = req.body;
-            const result = await userCollection.insertOne(users)
+            const user = req.body;
+            const result = await userCollection.insertOne(user)
             res.send(result)
         })
 
@@ -115,7 +128,21 @@ async function run() {
 
         // get all classes
         app.get('/classes', async (req, res) => {
-            const result = await classCollection.find().toArray()
+            const query = {status:'approved'}
+            const result = await classCollection.find(query).toArray()
+            res.send(result)
+        })
+        // get classes by instructor
+        app.get('/myClasses/:email',varifyJWT,async(req,res)=>{
+            const email = req.params.email;
+            const query={instructorEmail:email}
+            const result = await classCollection.find(query).toArray()
+            res.send(result)
+        })
+        // post class from instructor
+        app.post('/addAClass',varifyJWT,async(req,res)=>{
+            const newClass = req.body;
+            const result =await classCollection.insertOne(newClass)
             res.send(result)
         })
         // get all instructors
