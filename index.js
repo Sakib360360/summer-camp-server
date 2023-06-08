@@ -102,6 +102,17 @@ async function run() {
             const result = {instructor:user?.role === 'instructor'}
             res.send(result)
         })
+        // admin dashboard
+        app.get('/users/admin/:email',varifyJWT, async(req,res)=>{
+            const email = req.params.email;
+            if(req.decoded.email !== email){
+                return res.send({isAdmin:false})
+            }
+            const query = {email:email}
+            const user = await userCollection.findOne(query)
+            const result = {isAdmin:user?.role === 'admin'}
+            res.send(result)
+        })
 
 
         // delete selected classes
@@ -126,11 +137,29 @@ async function run() {
         })
 
 
-        // get all classes
+        // get all classes approved only
         app.get('/classes', async (req, res) => {
             const query = {status:'approved'}
             const result = await classCollection.find(query).toArray()
             res.send(result)
+        })
+        // get all classes for admin management
+        app.get('/allClasses',varifyJWT,async(req,res)=>{
+            const query = {status:'pending'}
+            const result = await classCollection.find(query).toArray()
+            res.send(result)
+        })
+        // update status
+        app.put('/updateStatus/:id',varifyJWT, async(req,res)=>{
+            const id = req.params.id;
+            const status = req.body.status
+            const filter = {_id:new ObjectId(id)}
+            const updateDoc = {
+                $set: { status: status }
+            }
+            const result = await classCollection.updateOne(filter,updateDoc)
+            res.send(result)
+            console.log(status,id)
         })
         // get classes by instructor
         app.get('/myClasses/:email',varifyJWT,async(req,res)=>{
