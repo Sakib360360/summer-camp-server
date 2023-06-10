@@ -285,6 +285,31 @@ async function run() {
 
 
 
+        // get all enrolled classes
+        app.get('/enrolledClasses',async(req,res)=>{
+            const result = await enrolledCollection.find().toArray()
+            res.send(result)
+        })
+
+
+
+        // update instructor popular classes
+        // app.patch('/updateInstructorEnrolledStudents/:instructorName',varifyJWT,async(req,res)=>{
+        //     const instructorName = req.params.instructorName;
+        //     const body = req.body.transactionId;
+        //     const array = [body]
+        //     const filter = { instructorName: new ObjectId(instructorName) }
+        //     const options = { upsert: true };
+        //     const updateDoc = {
+        //         $set: { totalEnrolledStudents: array }
+        //     };
+        //     const result = await selectedClasses.updateOne(filter, updateDoc,options)
+        //     res.send(result)
+        //     console.log(array)
+        // })
+
+
+
 
         // payment management
         app.post('/payments', async (req, res) => {
