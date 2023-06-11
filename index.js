@@ -210,6 +210,21 @@ async function run() {
             const result = await classCollection.insertOne(newClass)
             res.send(result)
         })
+        // update a class
+        app.put('/updateAClass/:id', varifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const updatedClass = req.body;
+
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: { updatedClass }
+            }
+            const result = await classCollection.updateOne(filter, updateDoc, options)
+            res.send(result)
+            console.log(filter, updateDoc, id)
+
+        })
         // get all instructors
         app.get('/instructors', async (req, res) => {
             const result = await instructorCollection.find().toArray()
@@ -286,7 +301,7 @@ async function run() {
 
 
         // get all enrolled classes
-        app.get('/enrolledClasses',async(req,res)=>{
+        app.get('/enrolledClasses', async (req, res) => {
             const result = await enrolledCollection.find().toArray()
             res.send(result)
         })
@@ -294,20 +309,19 @@ async function run() {
 
 
         // update instructor popular classes
+
         // app.patch('/updateInstructorEnrolledStudents/:instructorName',varifyJWT,async(req,res)=>{
         //     const instructorName = req.params.instructorName;
-        //     const body = req.body.transactionId;
-        //     const array = [body]
-        //     const filter = { instructorName: new ObjectId(instructorName) }
+        //     const body = req.body;
+        //     const filter = { classInstructor: instructorName }
         //     const options = { upsert: true };
         //     const updateDoc = {
-        //         $set: { totalEnrolledStudents: array }
+        //         $set: { totalEnrolledStudents: body }
         //     };
-        //     const result = await selectedClasses.updateOne(filter, updateDoc,options)
+        //     const result = await classCollection.updateOne(filter, updateDoc,options)
         //     res.send(result)
-        //     console.log(array)
+        //     console.log(body,filter)
         // })
-
 
 
 
