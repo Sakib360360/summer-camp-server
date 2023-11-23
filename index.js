@@ -51,7 +51,6 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
         const classCollection = client.db('language-camp').collection('classes')
-        const instructorCollection = client.db('language-camp').collection('instructors')
         const selectedClasses = client.db('language-camp').collection('selected-classes')
         const userCollection = client.db('language-camp').collection('users')
         const paymentCollection = client.db('language-camp').collection('payments')
@@ -227,9 +226,12 @@ async function run() {
         })
         // get all instructors
         app.get('/instructors', async (req, res) => {
-            const result = await instructorCollection.find().toArray()
+            const result = await userCollection.find().toArray()
+            const instructors = result.filter(instructor=>instructor.role === "instructor")
+            console.log(instructors)
             res.send(result)
         })
+    
 
 
 
@@ -308,20 +310,6 @@ async function run() {
 
 
 
-        // update instructor popular classes
-
-        // app.patch('/updateInstructorEnrolledStudents/:instructorName',varifyJWT,async(req,res)=>{
-        //     const instructorName = req.params.instructorName;
-        //     const body = req.body;
-        //     const filter = { classInstructor: instructorName }
-        //     const options = { upsert: true };
-        //     const updateDoc = {
-        //         $set: { totalEnrolledStudents: body }
-        //     };
-        //     const result = await classCollection.updateOne(filter, updateDoc,options)
-        //     res.send(result)
-        //     console.log(body,filter)
-        // })
 
 
 
